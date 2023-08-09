@@ -1,0 +1,47 @@
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.0;
+
+import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
+
+contract DegenGamingToken is ERC20, Ownable {
+    uint256 public prizeMoney;
+
+    constructor(
+        string memory _name,
+        string memory _symbol,
+        uint256 initialSupply
+    ) ERC20(_name, _symbol) {
+        _mint(msg.sender, initialSupply * (10 ** decimals()));
+        prizeMoney = 1000 * (10 ** decimals()); // Initial prize money amount
+    }
+function
+     mint(address account, uint256 amount) public onlyOwner {
+        _mint(account, amount * (10 ** decimals()));
+    }
+
+    function redeem() public {
+        require(balanceOf(msg.sender) >= prizeMoney, "Insufficient balance");
+        require(prizeMoney > 0, "Prize money is not available");
+
+        uint256 redeemedAmount = prizeMoney;
+        prizeMoney = (prizeMoney * 9) / 10; // Reduce prize money by 10%
+
+        // Transfer tokens to the contract owner for prize money
+        _transfer(msg.sender, owner(), redeemedAmount);
+
+        // Perform the in-game redemption logic here
+
+        emit Redeemed(msg.sender, redeemedAmount, prizeMoney);
+    }
+
+    function burn(uint256 amount) public {
+        _burn(msg.sender, amount * (10 ** decimals()));
+    }
+
+    function checkBalance(address account) public view returns (uint256) {
+        return balanceOf(account);
+    }
+
+    event Redeemed(address indexed user, uint256 redeemedAmount, uint256 newPrizeMoney);
+}
